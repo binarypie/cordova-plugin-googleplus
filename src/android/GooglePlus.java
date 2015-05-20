@@ -34,10 +34,11 @@ public class GooglePlus extends CordovaPlugin implements ConnectionCallbacks, On
   public static final String ACTION_DISCONNECT = "disconnect";
   public static final String ARGUMENT_ANDROID_KEY = "androidApiKey";
   public static final String ARGUMENT_WEB_KEY = "webApiKey";
+  public static final String ARGUMENT_SERVER_CLIENT_ID = "serverClientId";
 
   // Wraps our service connection to Google Play services and provides access to the users sign in state and Google APIs
   private GoogleApiClient mGoogleApiClient;
-  private String apiKey, webKey;
+  private String apiKey, webKey, serverClientId;
   private CallbackContext savedCallbackContext;
   private boolean trySilentLogin;
   private boolean loggingOut;
@@ -57,6 +58,7 @@ public class GooglePlus extends CordovaPlugin implements ConnectionCallbacks, On
       System.out.println(obj);
       this.webKey = obj.optString(ARGUMENT_WEB_KEY, null);
       this.apiKey = obj.optString(ARGUMENT_ANDROID_KEY, null);
+      this.serverClientId = obj.optString(ARGUMENT_SERVER_CLIENT_ID, null);
     }
 
     if (ACTION_IS_AVAILABLE.equals(action)) {
@@ -109,13 +111,18 @@ public class GooglePlus extends CordovaPlugin implements ConnectionCallbacks, On
   }
 
   private GoogleApiClient buildGoogleApiClient() {
-    return new GoogleApiClient.Builder(webView.getContext())
+    GoogleApiClient googleApiClient = new GoogleApiClient.Builder(webView.getContext())
         .addConnectionCallbacks(this)
         .addOnConnectionFailedListener(this)
         .addApi(Plus.API, Plus.PlusOptions.builder().build())
         .addScope(Plus.SCOPE_PLUS_LOGIN)
-        .addScope(Plus.SCOPE_PLUS_PROFILE)
-        .build();
+        .addScope(Plus.SCOPE_PLUS_PROFILE);
+
+        if (this.serverClientId != null) {
+            googleApiClient.requestServerAuthCode(this.serverClientId, this);
+        }
+
+        return googleApiClient.build();
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })

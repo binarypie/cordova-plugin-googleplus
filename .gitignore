@@ -1,1 +1,8 @@
 *.iml
+
+# Vim
+*.~
+*.swp
+*.swo
+*.swn
+*.vimrc

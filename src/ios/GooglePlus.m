@@ -57,12 +57,14 @@ static void swizzleMethod(Class class, SEL destinationSelector, SEL sourceSelect
   _callbackId = command.callbackId;
   NSDictionary* options = [command.arguments objectAtIndex:0];
   NSString* apiKey = [options objectForKey:@"iOSApiKey"];
+  NSString* serverClientID = [options objectForKey:@"serverClientId"];
+
   if (apiKey == nil) {
     CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"iOSApiKey not set"];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:_callbackId];
     return nil;
   }
-  
+
   GPPSignIn *signIn = [GPPSignIn sharedInstance];
   signIn.shouldFetchGooglePlusUser = YES;
   signIn.shouldFetchGoogleUserEmail = YES;
@@ -71,6 +73,11 @@ static void swizzleMethod(Class class, SEL destinationSelector, SEL sourceSelect
   signIn.scopes = @[kGTLAuthScopePlusLogin];
   signIn.attemptSSO = YES; // tries to use other installed Google apps
   signIn.delegate = self;
+
+  if (serverId != null) {
+      signIn.serverClientID = serverClientID;
+  }
+
   return signIn;
 }
 
